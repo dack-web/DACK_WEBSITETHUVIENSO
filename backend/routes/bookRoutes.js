@@ -10,14 +10,8 @@ const uploadMiddleware = upload.fields([
 ]);
 
 router.get("/", bookController.getAllBooks);
-
-// Chức năng: Tìm kiếm sách theo tên - Mỹ Tâm
-router.get('/search', bookController.searchBooks);
-
+router.get("/recommended", bookController.getRecommended);
 router.get("/:id", bookController.getBookById);
-
-// Chức năng: Gợi ý sách liên quan - Mỹ Tâm
-router.get("/:id/related", bookController.getRelatedBooks);
 
 router.post("/", uploadMiddleware, bookController.addBook);
 router.put("/:id", uploadMiddleware, bookController.updateBook);
