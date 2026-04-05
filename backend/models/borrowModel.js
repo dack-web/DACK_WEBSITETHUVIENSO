@@ -208,6 +208,57 @@ const Borrow = {
             activeBorrow,
         };
     },
+
+    // Cập nhật trạng thái quá hạn cho các phiếu chưa trả
+    updateOverdueStatuses: async ({ userId = null, isAdmin = false } = {}) => {
+        let sql = `
+            UPDATE borrows
+            SET status = 'late'
+            WHERE return_date IS NULL
+              AND due_date < CURDATE()
+              AND status <> 'late'
+        `;
+        const params = [];
+
+        if (!isAdmin) {
+            sql += " AND user_id = ?";
+            params.push(userId);
+        }
+
+        const result = await db.query(sql, params);
+        return result.affectedRows || 0;
+    },
+
+    // Lấy danh sách các phiếu quá hạn
+    getOverdueBorrows: async ({ userId = null, isAdmin = false } = {}) => {
+        let sql = `
+            SELECT
+                b.id,
+                b.user_id,
+                u.name AS user_name,
+                b.book_id,
+                bk.title AS book_title,
+                b.borrow_date,
+                b.due_date,
+                b.status,
+                DATEDIFF(CURDATE(), b.due_date) AS overdue_days
+            FROM borrows b
+            JOIN users u ON u.id = b.user_id
+            JOIN books bk ON bk.id = b.book_id
+            WHERE b.return_date IS NULL
+              AND (b.status = 'late' OR b.due_date < CURDATE())
+        `;
+        const params = [];
+
+        if (!isAdmin) {
+            sql += " AND b.user_id = ?";
+            params.push(userId);
+        }
+
+        sql += " ORDER BY b.due_date ASC";
+
+        return db.query(sql, params);
+    },
 };
 
 module.exports = Borrow;

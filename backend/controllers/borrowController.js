@@ -135,9 +135,16 @@ const borrowController = {
       const userId = req.user?.id;
       const isAdmin = req.user?.role === "admin";
 
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "Phải đăng nhập" });
+      }
+
+      const updatedCount = await Borrow.updateOverdueStatuses({ userId, isAdmin });
+
       const overdueRows = await Borrow.getOverdueBorrows({ userId, isAdmin });
       return res.status(200).json({
         success: true,
+        updatedCount,
         total: overdueRows.length,
         data: overdueRows,
       });
