@@ -121,7 +121,16 @@ const Book = {
         return result.insertId;
     },
 
-    
+    update: async (id, bookData) => {
+        const { title, author_id, category_id, description, cover_image, pdf_file, published_year } = bookData;
+        await db.query(`
+            UPDATE books 
+            SET title = ?, author_id = ?, category_id = ?, description = ?, 
+                cover_image = ?, pdf_file = ?, published_year = ? 
+            WHERE id = ?
+        `, [title, author_id, category_id, description, cover_image, pdf_file, published_year, id]);
+    },
+
     delete: async (id) => {
         await db.query("DELETE FROM books WHERE id = ?", [id]);
     }
