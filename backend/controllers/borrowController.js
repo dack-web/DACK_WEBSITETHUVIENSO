@@ -26,25 +26,4 @@ const borrowController = {
       return res.status(error.status || 500).json({ success: false, message: error.message });
     }
   },
-   // Trả sách
-  returnBook: async (req, res) => {
-    try {
-      const { borrowId } = req.params;
-      const isAdmin = req.user?.role === "admin";
-      const userId = req.user?.id;
-
-      const result = await Borrow.returnBook({
-        borrowId,
-        userId,
-        isAdmin
-      });
-
-      return res.status(200).json({ success: true, data: result });
-    } catch (error) {
-      console.error("💥 returnBook Error:", error);
-      return res.status(error.status || 500).json({ success: false, message: error.message });
-    }
-  },
-
-
 };
