@@ -138,6 +138,13 @@ label {
     margin-bottom: var(--sp-12);
 }
 
+.success-text {
+    color: green;
+    font-weight: 500;
+    font-size: var(--fs-14);
+    margin-bottom: var(--sp-12);
+}
+
 /* BUTTON */
 
 .recovery-btn {
@@ -306,7 +313,7 @@ footer p {
     .navbar {
         padding: 20px 24px;
     }
-
+    
     .recovery-card {
         padding: 32px 24px;
         margin: 0 16px;
@@ -327,14 +334,10 @@ footer p {
 }
 
 @media (max-width: 480px) {
-    .logo {
-        font-size: 18px;
-    }
-
-    .recovery-card h1 {
-        font-size: 22px;
-    }
-
+    .logo { font-size: 18px; }
+    
+    .recovery-card h1 { font-size: 22px; }
+    
     .recovery-container {
         padding: 24px 16px;
     }

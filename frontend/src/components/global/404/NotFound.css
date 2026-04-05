@@ -111,23 +111,19 @@ p {
         margin-bottom: 40px;
     }
 
-    .container .error {
+    .error {
         width: 100%;
         margin-right: 0;
         margin-bottom: 2rem;
         text-align: center;
     }
-
+    
     .hero-img {
         height: 40vh;
     }
 }
 
 @media (max-width: 480px) {
-    h1 {
-        font-size: 28px;
-    }
-    p {
-        font-size: 16px;
-    }
+    h1 { font-size: 28px; }
+    p { font-size: 16px; }
 }
