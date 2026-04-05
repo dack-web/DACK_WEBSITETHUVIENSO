@@ -1,16 +1,5 @@
 const db = require("../config/db_config");
 
-const Book = {
-    getAll: async () => {
-        const rows = await db.query(`
-            SELECT b.*, a.name as author_name, c.name as category_name 
-            FROM books b 
-            LEFT JOIN authors a ON b.author_id = a.id 
-            LEFT JOIN categories c ON b.category_id = c.id
-            ORDER BY b.created_at DESC
-        `);
-        return rows;
-    },
 
     getById: async (id) => {
         const rows = await db.query(`

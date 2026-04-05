@@ -56,6 +56,18 @@ const bookController = {
         }
     },
 
+    // Chức năng: Gợi ý sách liên quan - Mỹ Tâm
+    getRelatedBooks: async (req, res) => {
+        try {
+            const bookId = req.params.id;
+            const limit = req.query.limit || 5; // Mặc định lấy 5 cuốn gợi ý
+            
+            const relatedBooks = await Book.getRelatedBooks(bookId, limit);
+            res.status(200).json({ success: true, data: relatedBooks });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    },
 
     // Thêm sách mới
     addBook: async (req, res) => {
