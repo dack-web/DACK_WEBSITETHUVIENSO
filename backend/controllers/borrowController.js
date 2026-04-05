@@ -67,7 +67,7 @@ const borrowController = {
       return res.status(error.status || 500).json({ success: false, message: error.message });
     }
   },
-  
+
 // Đặt trước
   reserveBook: async (req, res) => {
     try {
@@ -87,5 +87,64 @@ const borrowController = {
       return res.status(error.status || 500).json({ success: false, message: error.message });
     }
   },
+
+  // Lịch sử mượn
+  getBorrowHistory: async (req, res) => {
+    console.log("🔍 Fetching history for user:", req.user?.id, "Role:", req.user?.role);
+    try {
+      const userId = req.user?.id;
+      const isAdmin = req.user?.role === "admin";
+      const targetUserId = req.query.user_id ? Number(req.query.user_id) : null;
+
+      if (!userId && !isAdmin) {
+        return res.status(401).json({ success: false, message: "Unauthorized", data: [] });
+      }
+
+      const history = await Borrow.getBorrowHistory({
+        userId,
+        isAdmin,
+        targetUserId,
+      });
+      
+      return res.status(200).json({ success: true, data: history });
+    } catch (error) {
+      console.error("💥 history ERROR:", error);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Lỗi tải lịch sử: " + error.message,
+        data: []
+      });
+    }
+  },
+
+// Lịch sử mượn
+  getBorrowHistory: async (req, res) => {
+    console.log("🔍 Fetching history for user:", req.user?.id, "Role:", req.user?.role);
+    try {
+      const userId = req.user?.id;
+      const isAdmin = req.user?.role === "admin";
+      const targetUserId = req.query.user_id ? Number(req.query.user_id) : null;
+
+      if (!userId && !isAdmin) {
+        return res.status(401).json({ success: false, message: "Unauthorized", data: [] });
+      }
+
+      const history = await Borrow.getBorrowHistory({
+        userId,
+        isAdmin,
+        targetUserId,
+      });
+      
+      return res.status(200).json({ success: true, data: history });
+    } catch (error) {
+      console.error("💥 history ERROR:", error);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Lỗi tải lịch sử: " + error.message,
+        data: []
+      });
+    }
+  },
+
 
 };
