@@ -55,7 +55,7 @@ const borrowController = {
     }
   },
 
-  // Gia hạn
+ // Gia hạn
   extendBorrow: async (req, res) => {
     try {
       const { borrowId } = req.params;

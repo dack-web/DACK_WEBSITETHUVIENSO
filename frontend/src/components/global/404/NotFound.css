@@ -10,7 +10,7 @@
     padding-right: 175px;
 }
 
-.error {
+.container .error {
     width: 50%;
     text-align: left;
     margin-right: 2rem;
@@ -42,7 +42,9 @@ p {
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
     text-decoration: none;
     position: relative;
     overflow: hidden;
