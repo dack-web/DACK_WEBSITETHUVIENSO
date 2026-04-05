@@ -1,50 +1,54 @@
 const db = require("../config/db_config");
 
 const initDatabaseTables = async () => {
-    try {
-        /*
+  try {
+    /*
       USERS
       Bảng lưu thông tin người dùng của hệ thống
     */
-        await db.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY, -- id tự tăng
-        name VARCHAR(100) NOT NULL, -- tên người dùng
-        email VARCHAR(100) UNIQUE NOT NULL, -- email duy nhất
-        password VARCHAR(255) NOT NULL, -- mật khẩu đã mã hóa
-        avatar VARCHAR(255), -- ảnh đại diện
-        role ENUM('user','admin') DEFAULT 'user', -- quyền
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- ngày tạo
-      )
-    `);
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS users (
+          id INT AUTO_INCREMENT PRIMARY KEY, -- id tự tăng
+          name VARCHAR(100) NOT NULL, -- tên người dùng
+          email VARCHAR(100) UNIQUE NOT NULL, -- email duy nhất
+          password VARCHAR(255) NOT NULL, -- mật khẩu đã mã hóa
+          avatar VARCHAR(255), -- ảnh đại diện
+          phone VARCHAR(20), -- số điện thoại
+          address TEXT, -- địa chỉ
+          student_id VARCHAR(50), -- mã sinh viên
+          department VARCHAR(100), -- khoa / bộ môn
+          role ENUM('user','admin') DEFAULT 'user', -- quyền
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- ngày tạo
+        )
+      `);
 
-        /*
+    /*
       AUTHORS
       Bảng lưu thông tin tác giả
     */
-        await db.query(`
+    await db.query(`
       CREATE TABLE IF NOT EXISTS authors (
         id INT AUTO_INCREMENT PRIMARY KEY, -- id tác giả
         name VARCHAR(150) NOT NULL -- tên tác giả
       )
     `);
 
-        /*
+    /*
       CATEGORIES
       Bảng lưu thể loại sách
     */
-        await db.query(`
+    await db.query(`
       CREATE TABLE IF NOT EXISTS categories (
         id INT AUTO_INCREMENT PRIMARY KEY, -- id thể loại
         name VARCHAR(150) NOT NULL -- tên thể loại
       )
     `);
 
-        /*
+    /*
       BOOKS
       Bảng lưu thông tin sách
     */
-        await db.query(`
+    await db.query(`
       CREATE TABLE IF NOT EXISTS books (
         id INT AUTO_INCREMENT PRIMARY KEY, -- id sách
         title VARCHAR(255) NOT NULL, -- tiêu đề sách
@@ -54,6 +58,7 @@ const initDatabaseTables = async () => {
         cover_image VARCHAR(255), -- ảnh bìa
         pdf_file VARCHAR(255), -- file pdf
         published_year INT, -- năm xuất bản
+        isbn VARCHAR(50) UNIQUE, -- mã ISBN
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- ngày tạo
 
         FOREIGN KEY (author_id)
@@ -66,11 +71,11 @@ const initDatabaseTables = async () => {
       )
     `);
 
-        /*
+    /*
       BORROWS
       Bảng lưu thông tin mượn sách
     */
-        await db.query(`
+    await db.query(`
       CREATE TABLE IF NOT EXISTS borrows (
         id INT AUTO_INCREMENT PRIMARY KEY, -- id mượn sách
         user_id INT NOT NULL, -- người mượn
@@ -92,11 +97,11 @@ const initDatabaseTables = async () => {
       )
     `);
 
-        /*
+    /*
       RESERVATIONS
       Bảng lưu thông tin đặt trước sách
     */
-        await db.query(`
+    await db.query(`
       CREATE TABLE IF NOT EXISTS reservations (
         id INT AUTO_INCREMENT PRIMARY KEY, -- id đặt trước
         user_id INT,
@@ -113,11 +118,11 @@ const initDatabaseTables = async () => {
       )
     `);
 
-        /*
+    /*
       REVIEWS
       Bảng lưu đánh giá và bình luận sách
     */
-        await db.query(`
+    await db.query(`
       CREATE TABLE IF NOT EXISTS reviews (
         id INT AUTO_INCREMENT PRIMARY KEY, -- id đánh giá
         user_id INT,
@@ -136,11 +141,11 @@ const initDatabaseTables = async () => {
       )
     `);
 
-        /*
+    /*
       READING HISTORY
       Bảng lưu lịch sử đọc sách
     */
-        await db.query(`
+    await db.query(`
       CREATE TABLE IF NOT EXISTS reading_history (
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT,
@@ -153,11 +158,11 @@ const initDatabaseTables = async () => {
       )
     `);
 
-        /*
+    /*
       REFRESH TOKENS
       Bảng lưu refresh token để cấp lại access token
     */
-        await db.query(`
+    await db.query(`
       CREATE TABLE IF NOT EXISTS refresh_tokens (
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT NOT NULL,
@@ -171,11 +176,11 @@ const initDatabaseTables = async () => {
       )
     `);
 
-        /*
+    /*
       PASSWORD RESETS
       Bảng lưu token reset mật khẩu
     */
-        await db.query(`
+    await db.query(`
       CREATE TABLE IF NOT EXISTS password_resets (
         id INT AUTO_INCREMENT PRIMARY KEY,
         email VARCHAR(100),
@@ -184,10 +189,30 @@ const initDatabaseTables = async () => {
       )
     `);
 
-        console.log("✅ All tables created successfully");
-    } catch (error) {
-        console.error("❌ Database init error:", error);
-    }
+    /*
+      FAVORITES
+      Bảng lưu sách yêu thích của người dùng
+    */
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS favorites (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          user_id INT NOT NULL,
+          book_id INT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE KEY (user_id, book_id),
+          FOREIGN KEY (user_id)
+            REFERENCES users(id)
+            ON DELETE CASCADE,
+          FOREIGN KEY (book_id)
+            REFERENCES books(id)
+            ON DELETE CASCADE
+        )
+      `);
+
+    console.log("✅ All tables created successfully");
+  } catch (error) {
+    console.error("❌ Database init error:", error);
+  }
 };
 
 module.exports = initDatabaseTables;

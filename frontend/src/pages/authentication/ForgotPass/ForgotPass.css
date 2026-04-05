@@ -97,13 +97,12 @@ label {
     width: 100%;
     display: flex;
     align-items: center;
-
     background: #f3f4f6;
     border: 1px solid #e5e7eb;
     padding: var(--sp-14) var(--sp-16);
     border-radius: var(--radius-8);
     margin-top: var(--sp-6);
-    margin-bottom: var(--sp-16);
+    margin-bottom: var(--sp-12);
     transition: 0.2s;
 }
 
@@ -124,6 +123,13 @@ label {
     background: none;
     width: 100%;
     font-size: var(--fs-14);
+}
+
+.success-text {
+    color: green;
+    font-weight: 500;
+    font-size: var(--fs-14);
+    margin-bottom: var(--sp-12);
 }
 
 /* BUTTON */
@@ -287,6 +293,16 @@ footer {
 }
 
 /* RESPONSIVE */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 20px 24px;
+    }
+    
+    .recovery-card {
+        padding: 32px 24px;
+        margin: 0 16px;
+    }
+}
 
 @media (max-width: 600px) {
     .info-boxes {
@@ -298,5 +314,15 @@ footer {
         align-items: center;
         gap: 10px;
         text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo { font-size: 18px; }
+    
+    .recovery-card h1 { font-size: 22px; }
+    
+    .recovery-container {
+        padding: 24px 16px;
     }
 }

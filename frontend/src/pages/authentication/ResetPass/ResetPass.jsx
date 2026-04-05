@@ -1,7 +1,26 @@
-import React from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 import "./ResetPass.css";
+import { useAuth } from "../../../contexts/authentication/AuthContext";
+import { useSearchParams } from "react-router-dom";
 
 const ResetPass = () => {
+    const { resetPassword } = useAuth();
+    const [searchParams] = useSearchParams();
+    const token = searchParams.get("token");
+
+    const passwordSchema = Yup.object({
+        password: Yup.string()
+            .min(12, "Mật khẩu phải có ít nhất 12 ký tự")
+            .matches(/[0-9]/, "Mật khẩu phải chứa ít nhất 1 số")
+            .matches(/[!@#$%^&*]/, "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt")
+            .required("Vui lòng nhập mật khẩu"),
+
+        confirmPassword: Yup.string()
+            .oneOf([Yup.ref("password")], "Mật khẩu xác nhận không khớp")
+            .required("Vui lòng xác nhận mật khẩu"),
+    });
+
     return (
         <div className="reset-page">
             {/* MAIN */}
@@ -33,41 +52,78 @@ const ResetPass = () => {
 
                         <p className="subtitle">Enter your new credentials below to regain access to your dashboard.</p>
 
-                        <form className="form-reset">
-                            <label>NEW PASSWORD</label>
+                        <Formik
+                            initialValues={{
+                                password: "",
+                                confirmPassword: "",
+                            }}
+                            validationSchema={passwordSchema}
+                            onSubmit={async (values, { setSubmitting }) => {
+                                try {
+                                    await resetPassword({
+                                        token,
+                                        new_password: values.password,
+                                    });
+                                } catch (err) {
+                                    console.error(err);
+                                } finally {
+                                    setSubmitting(false);
+                                }
+                            }}
+                        >
+                            {({ values, isSubmitting }) => {
+                                const hasLength = values.password.length >= 12;
+                                const hasNumber = /[0-9]/.test(values.password);
+                                const hasSpecial = /[!@#$%^&*]/.test(values.password);
 
-                            <div className="input">
-                                <i className="fa-solid fa-lock"></i>
-                                <input type="password" placeholder="••••••••••••" />
-                            </div>
+                                return (
+                                    <Form className="form-reset">
+                                        <label>NEW PASSWORD</label>
 
-                            <label>CONFIRM NEW PASSWORD</label>
+                                        <div className="input">
+                                            <i className="fa-solid fa-lock"></i>
 
-                            <div className="input">
-                                <i className="fa-solid fa-lock"></i>
-                                <input type="password" placeholder="••••••••••••" />
-                            </div>
+                                            <Field name="password" type="password" placeholder="••••••••••••" autoComplete="new-password" />
+                                        </div>
 
-                            <div className="rules">
-                                <div className="rule active">
-                                    <i className="fa-solid fa-circle-check"></i>
-                                    Minimum 12 characters
-                                </div>
+                                        <ErrorMessage name="password" component="div" className="error" />
 
-                                <div className="rule ">
-                                    <i className="fa-solid fa-circle"></i>
-                                    Includes a special character (@,#,$)
-                                </div>
+                                        <label>CONFIRM NEW PASSWORD</label>
 
-                                <div className="rule">
-                                    <i className="fa-solid fa-circle"></i>
-                                    At least one numeral (0-9)
-                                </div>
-                            </div>
+                                        <div className="input">
+                                            <i className="fa-solid fa-lock"></i>
 
-                            <button className="reset-btn">Update Password →</button>
-                        </form>
+                                            <Field name="confirmPassword" type="password" placeholder="••••••••••••" autoComplete="new-password" />
+                                        </div>
 
+                                        <ErrorMessage name="confirmPassword" component="div" className="error" />
+
+                                        {/* PASSWORD RULES */}
+
+                                        <div className="rules">
+                                            <div className={`rule ${hasLength ? "active" : ""}`}>
+                                                <i className={`fa-solid ${hasLength ? "fa-circle-check" : "fa-circle"}`}></i>
+                                                Minimum 12 characters
+                                            </div>
+
+                                            <div className={`rule ${hasSpecial ? "active" : ""}`}>
+                                                <i className={`fa-solid ${hasSpecial ? "fa-circle-check" : "fa-circle"}`}></i>
+                                                Includes a special character (@,#,$)
+                                            </div>
+
+                                            <div className={`rule ${hasNumber ? "active" : ""}`}>
+                                                <i className={`fa-solid ${hasNumber ? "fa-circle-check" : "fa-circle"}`}></i>
+                                                At least one numeral (0-9)
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" className="reset-btn" disabled={isSubmitting}>
+                                            {isSubmitting ? "Updating..." : "Update Password →"}
+                                        </button>
+                                    </Form>
+                                );
+                            }}
+                        </Formik>
                         <a className="back-link" href="/login">
                             <span className="arrow">←</span>
                             Return to Login
