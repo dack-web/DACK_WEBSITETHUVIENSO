@@ -71,7 +71,7 @@
     background: white;
     border-radius: 16px;
     overflow-x: auto;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .members-table {
@@ -85,6 +85,7 @@
     padding: 16px;
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
+    color: black;
 }
 
 .members-table th {
@@ -105,7 +106,8 @@
     gap: 8px;
 }
 
-.edit-btn, .delete-btn {
+.edit-btn,
+.delete-btn {
     padding: 6px 10px;
     border: none;
     border-radius: 6px;
@@ -150,7 +152,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
@@ -239,7 +241,7 @@
 .form-group textarea:focus {
     outline: none;
     border-color: #1a3a5f;
-    box-shadow: 0 0 0 3px rgba(26,58,95,0.1);
+    box-shadow: 0 0 0 3px rgba(26, 58, 95, 0.1);
 }
 
 .form-row {
@@ -298,32 +300,32 @@
     .members-container {
         padding: 16px;
     }
-    
+
     .members-header {
         flex-direction: column;
         align-items: stretch;
         text-align: center;
     }
-    
+
     .members-header h1 {
         font-size: 24px;
     }
-    
+
     .add-btn {
         width: 100%;
         justify-content: center;
     }
-    
+
     .form-row {
         grid-template-columns: 1fr;
         gap: 0;
     }
-    
+
     .modal-content {
         width: 95%;
         max-height: 95vh;
     }
-    
+
     .modal-header h2 {
         font-size: 18px;
     }
@@ -335,21 +337,23 @@
         padding: 10px;
         font-size: 11px;
     }
-    
-    .edit-btn, .delete-btn {
+
+    .edit-btn,
+    .delete-btn {
         padding: 6px 8px;
     }
-    
+
     .modal-content form {
         padding: 12px;
     }
-    
+
     .modal-footer {
         flex-direction: column;
         gap: 8px;
     }
-    
-    .submit-btn, .cancel-btn {
+
+    .submit-btn,
+    .cancel-btn {
         width: 100%;
     }
 }
