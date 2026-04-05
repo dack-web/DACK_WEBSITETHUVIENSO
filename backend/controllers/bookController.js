@@ -37,18 +37,7 @@ const bookController = {
         }
     },
 
-    // Lấy chi tiết 1 cuốn sách
-    getBookById: async (req, res) => {
-        try {
-            const book = await Book.getById(req.params.id);
-            if (!book) {
-                return res.status(404).json({ success: false, message: "Không tìm thấy sách" });
-            }
-            res.status(200).json({ success: true, data: book });
-        } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
-        }
-    },
+  
 
     // Chức năng: Gợi ý sách liên quan - Mỹ Tâm
     getRelatedBooks: async (req, res) => {
@@ -101,7 +90,17 @@ const bookController = {
         }
     },
 
- 
+    // Cập nhật sách
+    updateBook: async (req, res) => {
+        try {
+            const bookId = req.params.id;
+            const oldBook = await Book.getById(bookId);
+            if (!oldBook) {
+                return res.status(404).json({ success: false, message: "Không tìm thấy sách" });
+            }
+
+            const { title, author_id, category_id, description, published_year } = req.body;
+            
             // Xử lý file upload mới
             let cover_image = oldBook.cover_image;
             let pdf_file = oldBook.pdf_file;
