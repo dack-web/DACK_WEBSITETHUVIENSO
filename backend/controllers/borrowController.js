@@ -146,5 +146,47 @@ const borrowController = {
     }
   },
 
+ // Trạng thái sách
+  getBookStatus: async (req, res) => {
+    try {
+      const { bookId } = req.params;
+      const status = await Borrow.getBookStatus(bookId);
+      return res.status(200).json({ success: true, data: status });
+    } catch (error) {
+      return res.status(error.status || 500).json({ success: false, message: error.message });
+    }
+  },
 
+  // Kiểm tra quá hạn
+  checkOverdue: async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      const isAdmin = req.user?.role === "admin";
+
+      const overdueRows = await Borrow.getOverdueBorrows({ userId, isAdmin });
+      return res.status(200).json({
+        success: true,
+        total: overdueRows.length,
+        data: overdueRows,
+      });
+    } catch (error) {
+      return res.status(error.status || 500).json({ success: false, message: error.message });
+    }
+  },
+
+  seedHistory: async (req, res) => {
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Admin only" });
+    }
+    try {
+      const { seedCirculationData } = require("../database/seedCirculation");
+      const result = await seedCirculationData();
+      return res.status(201).json(result);
+    } catch (error) {
+      console.error("💥 Seed ERROR:", error);
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  }
 };
+
+module.exports = borrowController;
