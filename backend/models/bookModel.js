@@ -48,21 +48,9 @@ const Book = {
             countParams.push(authorId);
         }
 
-        // Xử lý chức năng sắp xếp (Mỹ Tâm)
-        if (sortBy === 'az') {
-            query += ` ORDER BY b.title ASC`; // Từ A đến Z
-        } else if (sortBy === 'za') {
-            query += ` ORDER BY b.title DESC`; // Từ Z về A
-        } else if (sortBy === 'oldest') {
-            query += ` ORDER BY b.published_year ASC`; // Cũ nhất (theo năm xuất bản)
-        } else {
-            query += ` ORDER BY b.created_at DESC`; // Mặc định: Mới nhất lên trước
-        }
+        
 
-        // Xử lý chức năng phân trang (Mỹ Tâm)
-        const offset = (currentPage - 1) * perPage;
-        query += ` LIMIT ? OFFSET ?`;
-        params.push(perPage, offset);
+        
 
         // Fix lỗi cấu hình DB trả về mảng trực tiếp
         let result = await db.query(query, params);
