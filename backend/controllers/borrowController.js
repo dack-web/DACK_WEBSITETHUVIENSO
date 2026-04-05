@@ -104,59 +104,36 @@ const borrowController = {
     }
   },
 
-  // Lịch sử mượn
-  getBorrowHistory: async (req, res) => {
-    console.log(
-      "🔍 Fetching history for user:",
-      req.user?.id,
-      "Role:",
-      req.user?.role,
-    );
+  // Đặt trước
+  reserveBook: async (req, res) => {
     try {
+      const { book_id } = req.body;
       const userId = req.user?.id;
-      const isAdmin = req.user?.role === "admin";
-      const targetUserId = req.query.user_id ? Number(req.query.user_id) : null;
 
-      if (!userId && !isAdmin) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Unauthorized", data: [] });
-      }
+      if (!userId) return res.status(401).json({ success: false, message: "Phải đăng nhập" });
 
-      const history = await Borrow.getBorrowHistory({
+      const result = await Borrow.reserveBook({
         userId,
-        isAdmin,
-        targetUserId,
+        bookId: book_id
       });
 
-      return res.status(200).json({ success: true, data: history });
+      return res.status(200).json({ success: true, data: result });
     } catch (error) {
-      console.error("💥 history ERROR:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Lỗi tải lịch sử: " + error.message,
-        data: [],
-      });
+      console.error("💥 reserveBook Error:", error);
+      return res.status(error.status || 500).json({ success: false, message: error.message });
     }
   },
 
   // Lịch sử mượn
   getBorrowHistory: async (req, res) => {
-    console.log(
-      "🔍 Fetching history for user:",
-      req.user?.id,
-      "Role:",
-      req.user?.role,
-    );
+    console.log("🔍 Fetching history for user:", req.user?.id, "Role:", req.user?.role);
     try {
       const userId = req.user?.id;
       const isAdmin = req.user?.role === "admin";
       const targetUserId = req.query.user_id ? Number(req.query.user_id) : null;
 
       if (!userId && !isAdmin) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Unauthorized", data: [] });
+        return res.status(401).json({ success: false, message: "Unauthorized", data: [] });
       }
 
       const history = await Borrow.getBorrowHistory({
@@ -164,14 +141,14 @@ const borrowController = {
         isAdmin,
         targetUserId,
       });
-
+      
       return res.status(200).json({ success: true, data: history });
     } catch (error) {
       console.error("💥 history ERROR:", error);
-      return res.status(500).json({
-        success: false,
+      return res.status(500).json({ 
+        success: false, 
         message: "Lỗi tải lịch sử: " + error.message,
-        data: [],
+        data: []
       });
     }
   },
@@ -183,9 +160,7 @@ const borrowController = {
       const status = await Borrow.getBookStatus(bookId);
       return res.status(200).json({ success: true, data: status });
     } catch (error) {
-      return res
-        .status(error.status || 500)
-        .json({ success: false, message: error.message });
+      return res.status(error.status || 500).json({ success: false, message: error.message });
     }
   },
 
@@ -195,16 +170,21 @@ const borrowController = {
       const userId = req.user?.id;
       const isAdmin = req.user?.role === "admin";
 
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "Phải đăng nhập" });
+      }
+
+      const updatedCount = await Borrow.updateOverdueStatuses({ userId, isAdmin });
+
       const overdueRows = await Borrow.getOverdueBorrows({ userId, isAdmin });
       return res.status(200).json({
         success: true,
+        updatedCount,
         total: overdueRows.length,
         data: overdueRows,
       });
     } catch (error) {
-      return res
-        .status(error.status || 500)
-        .json({ success: false, message: error.message });
+      return res.status(error.status || 500).json({ success: false, message: error.message });
     }
   },
 
@@ -220,6 +200,6 @@ const borrowController = {
       console.error("💥 Seed ERROR:", error);
       return res.status(500).json({ success: false, message: error.message });
     }
-  },
+  }
 };
 module.exports = borrowController;
