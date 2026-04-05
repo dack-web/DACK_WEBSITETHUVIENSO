@@ -6,27 +6,34 @@ const borrowController = {
     try {
       const { user_id, book_id, borrow_days } = req.body;
       const isAdmin = req.user?.role === "admin";
-      
+
       // Nếu là admin, có thể mượn hộ người khác bằng cách truyền user_id
-      const finalUserId = (isAdmin && user_id) ? user_id : req.user?.id;
+      const finalUserId = isAdmin && user_id ? user_id : req.user?.id;
 
       if (!finalUserId) {
-        return res.status(401).json({ success: false, message: "Yêu cầu đăng nhập hoặc ID người dùng" });
+        return res
+          .status(401)
+          .json({
+            success: false,
+            message: "Yêu cầu đăng nhập hoặc ID người dùng",
+          });
       }
 
       const result = await Borrow.borrowBook({
         userId: finalUserId,
         bookId: book_id,
-        borrowDays: borrow_days || 14
+        borrowDays: borrow_days || 14,
       });
 
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
       console.error("💥 borrowBook Error:", error);
-      return res.status(error.status || 500).json({ success: false, message: error.message });
+      return res
+        .status(error.status || 500)
+        .json({ success: false, message: error.message });
     }
   },
-   // Trả sách
+  // Trả sách
   returnBook: async (req, res) => {
     try {
       const { borrowId } = req.params;
@@ -36,13 +43,15 @@ const borrowController = {
       const result = await Borrow.returnBook({
         borrowId,
         userId,
-        isAdmin
+        isAdmin,
       });
 
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
       console.error("💥 returnBook Error:", error);
-      return res.status(error.status || 500).json({ success: false, message: error.message });
+      return res
+        .status(error.status || 500)
+        .json({ success: false, message: error.message });
     }
   },
 
@@ -58,13 +67,40 @@ const borrowController = {
         borrowId,
         userId,
         extraDays: extra_days || 7,
-        isAdmin
+        isAdmin,
       });
 
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
       console.error("💥 extendBorrow Error:", error);
-      return res.status(error.status || 500).json({ success: false, message: error.message });
+      return res
+        .status(error.status || 500)
+        .json({ success: false, message: error.message });
+    }
+  },
+
+  // Đặt trước
+  reserveBook: async (req, res) => {
+    try {
+      const { book_id } = req.body;
+      const userId = req.user?.id;
+
+      if (!userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Phải đăng nhập" });
+
+      const result = await Borrow.reserveBook({
+        userId,
+        bookId: book_id,
+      });
+
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      console.error("💥 reserveBook Error:", error);
+      return res
+        .status(error.status || 500)
+        .json({ success: false, message: error.message });
     }
   },
 
@@ -166,3 +202,4 @@ const borrowController = {
     }
   }
 };
+module.exports = borrowController;
