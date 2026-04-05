@@ -8,34 +8,52 @@ const resetModel = require("../models/passwordResetModel");
 const sendResetMail = require("../utils/node_mailer"); // bạn tự viết hoặc dùng nodemailer
 
 // REGISTER
-exports.register = async ({ name, email, password }) => {
+exports.register = async ({ fullName, email, password }) => {
     const user = await userModel.findUserByEmail(email);
     if (user) throw new Error("Email already exists");
 
     const hash = await bcrypt.hash(password, 10);
-    const userId = await userModel.createUser(name, email, hash);
+    const userId = await userModel.createUser(fullName, email, hash);
 
-    return { id: userId, name, email };
+    return { id: userId, fullName, email };
 };
 
 // LOGIN
 exports.login = async ({ email, password }) => {
-    const user = await userModel.findUserByEmail(email);
-    if (!user) throw new Error("Invalid email");
+    const user = await userModel.findUserByEmail(email.toLowerCase());
+
+    if (!user) {
+        const err = new Error("Invalid email");
+        err.status = 401;
+        throw err;
+    }
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) throw new Error("Wrong password");
 
-    const accessToken = jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: "15m" });
+    if (!match) {
+        const err = new Error("Wrong password");
+        err.status = 401;
+        throw err;
+    }
 
-    const refreshToken = jwt.sign({ id: user.id }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
+    const accessToken = jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRE || "15m" });
+
+    const refreshToken = jwt.sign({ id: user.id }, process.env.JWT_REFRESH_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRE || "7d" });
 
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
 
     await tokenModel.saveToken(user.id, refreshToken, expiresAt);
 
-    return { accessToken, refreshToken };
+    return {
+        accessToken,
+        refreshToken,
+        user: {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+        },
+    };
 };
 
 // LOGOUT
@@ -45,17 +63,54 @@ exports.logout = async (refreshToken) => {
 
 // REFRESH TOKEN
 exports.refreshToken = async (refreshToken) => {
-    if (!refreshToken) throw new Error("No token provided");
+    if (!refreshToken) {
+        const err = new Error("No token provided");
+        err.status = 401;
+        throw err;
+    }
 
+    // Check token tồn tại trong DB
     const tokenRecord = await tokenModel.findToken(refreshToken);
-    if (!tokenRecord) throw new Error("Invalid token");
 
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    if (!tokenRecord) {
+        const err = new Error("Invalid refresh token");
+        err.status = 401;
+        throw err;
+    }
+
+    let decoded;
+
+    try {
+        decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    } catch (err) {
+        const error = new Error("Refresh token expired or invalid");
+        error.status = 401;
+        throw error;
+    }
+
     const user = await userModel.findUserById(decoded.id);
 
-    const newAccessToken = jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: "15m" });
+    if (!user) {
+        const err = new Error("User not found");
+        err.status = 401;
+        throw err;
+    }
 
-    return { accessToken: newAccessToken };
+    const newAccessToken = jwt.sign(
+        {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRE || "15m",
+        },
+    );
+
+    return {
+        accessToken: newAccessToken,
+    };
 };
 
 // FORGOT PASSWORD

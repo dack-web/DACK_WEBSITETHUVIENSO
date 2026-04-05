@@ -99,6 +99,12 @@
     font-weight: 600;
     color: var(--primary-200);
 }
+.form-reset .error {
+    color: var(--primary-red);
+    font-size: var(--fs-12);
+    padding-left: var(--sp-4);
+    margin-bottom: var(--sp-16);
+}
 
 /* INPUT */
 
@@ -112,7 +118,7 @@
     padding: var(--sp-14) var(--sp-16);
     border-radius: var(--radius-8);
     margin-top: var(--sp-6);
-    margin-bottom: var(--sp-16);
+
     transition: 0.2s;
 }
 .input:focus-within {
@@ -331,4 +337,11 @@
     .right-panel {
         padding: 30px 25px;
     }
+}
+
+@media (max-width: 480px) {
+    .left-panel { padding: 32px 24px; }
+    .left-panel h2 { font-size: 22px; }
+    .right-panel h2 { font-size: 22px; }
+    .reset-btn { padding: 14px; }
 }

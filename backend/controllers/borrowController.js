@@ -26,8 +26,7 @@ const borrowController = {
       return res.status(error.status || 500).json({ success: false, message: error.message });
     }
   },
-
-  // Trả sách
+   // Trả sách
   returnBook: async (req, res) => {
     try {
       const { borrowId } = req.params;
@@ -47,7 +46,7 @@ const borrowController = {
     }
   },
 
-  // Gia hạn
+ // Gia hạn
   extendBorrow: async (req, res) => {
     try {
       const { borrowId } = req.params;
@@ -167,5 +166,3 @@ const borrowController = {
     }
   }
 };
-
-module.exports = borrowController;

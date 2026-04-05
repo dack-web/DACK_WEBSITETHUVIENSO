@@ -24,8 +24,10 @@
     --primary-400: #3b88d7;
     --primary-300: #4399f2;
     --primary-200: #4b5563;
-    --primary-white: #ffffff;
-    --Light_mode-Gray_Scale-40: #8d9094; /* Màu trắng dùng cho text trên nền primary */
+    --primary-white: #ffffff; /* Màu trắng dùng cho text trên nền primary */
+    --side-bar-bg: #f3f4f5;
+    --Light_mode-Gray_Scale-40: #8d9094;
+
     --primary-red: #e74c3c; /* Màu đỏ dùng cho lỗi */
     /* =========================
      Background Colors
@@ -266,10 +268,10 @@ select {
 }
 
 .nav-item.active {
-    background-color: white;
+    background-color: var(--primary-white);
 
     color: var(--primary-900);
-
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     font-weight: 700;
 }
 
