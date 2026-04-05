@@ -67,5 +67,25 @@ const borrowController = {
       return res.status(error.status || 500).json({ success: false, message: error.message });
     }
   },
+  
+// Đặt trước
+  reserveBook: async (req, res) => {
+    try {
+      const { book_id } = req.body;
+      const userId = req.user?.id;
+
+      if (!userId) return res.status(401).json({ success: false, message: "Phải đăng nhập" });
+
+      const result = await Borrow.reserveBook({
+        userId,
+        bookId: book_id
+      });
+
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      console.error("💥 reserveBook Error:", error);
+      return res.status(error.status || 500).json({ success: false, message: error.message });
+    }
+  },
 
 };
