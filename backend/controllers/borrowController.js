@@ -26,4 +26,46 @@ const borrowController = {
       return res.status(error.status || 500).json({ success: false, message: error.message });
     }
   },
+   // Trả sách
+  returnBook: async (req, res) => {
+    try {
+      const { borrowId } = req.params;
+      const isAdmin = req.user?.role === "admin";
+      const userId = req.user?.id;
+
+      const result = await Borrow.returnBook({
+        borrowId,
+        userId,
+        isAdmin
+      });
+
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      console.error("💥 returnBook Error:", error);
+      return res.status(error.status || 500).json({ success: false, message: error.message });
+    }
+  },
+
+ // Gia hạn
+  extendBorrow: async (req, res) => {
+    try {
+      const { borrowId } = req.params;
+      const { extra_days } = req.body;
+      const isAdmin = req.user?.role === "admin";
+      const userId = req.user?.id;
+
+      const result = await Borrow.extendBorrow({
+        borrowId,
+        userId,
+        extraDays: extra_days || 7,
+        isAdmin
+      });
+
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      console.error("💥 extendBorrow Error:", error);
+      return res.status(error.status || 500).json({ success: false, message: error.message });
+    }
+  },
+
 };
