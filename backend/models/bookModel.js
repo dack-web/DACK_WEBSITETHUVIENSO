@@ -13,13 +13,6 @@ const Book = {
         return rows;
     },
 
-    // Chức năng: Tìm kiếm sách theo tên - Mỹ Tâm
-    // Đã nâng cấp: Thêm Lọc, Sắp xếp và Phân trang
-    searchByTitle: async (keyword, categoryId, authorId, sortBy, page = 1, limit = 5) => {
-        const currentPage = Number(page) || 1;
-        const perPage = Number(limit) || 5;
-
-        let query = `
     getById: async (id) => {
         const rows = await db.query(`
             SELECT b.*, a.name as author_name, c.name as category_name 
@@ -111,6 +104,7 @@ const Book = {
         return result.insertId;
     },
 
+    
     update: async (id, bookData) => {
         const { title, author_id, category_id, description, cover_image, pdf_file, published_year, isbn } = bookData;
         await db.query(`
