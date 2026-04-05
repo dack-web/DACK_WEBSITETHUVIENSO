@@ -6,27 +6,34 @@ const borrowController = {
     try {
       const { user_id, book_id, borrow_days } = req.body;
       const isAdmin = req.user?.role === "admin";
-      
+
       // Nếu là admin, có thể mượn hộ người khác bằng cách truyền user_id
-      const finalUserId = (isAdmin && user_id) ? user_id : req.user?.id;
+      const finalUserId = isAdmin && user_id ? user_id : req.user?.id;
 
       if (!finalUserId) {
-        return res.status(401).json({ success: false, message: "Yêu cầu đăng nhập hoặc ID người dùng" });
+        return res
+          .status(401)
+          .json({
+            success: false,
+            message: "Yêu cầu đăng nhập hoặc ID người dùng",
+          });
       }
 
       const result = await Borrow.borrowBook({
         userId: finalUserId,
         bookId: book_id,
-        borrowDays: borrow_days || 14
+        borrowDays: borrow_days || 14,
       });
 
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
       console.error("💥 borrowBook Error:", error);
-      return res.status(error.status || 500).json({ success: false, message: error.message });
+      return res
+        .status(error.status || 500)
+        .json({ success: false, message: error.message });
     }
   },
-   // Trả sách
+  // Trả sách
   returnBook: async (req, res) => {
     try {
       const { borrowId } = req.params;
@@ -36,17 +43,19 @@ const borrowController = {
       const result = await Borrow.returnBook({
         borrowId,
         userId,
-        isAdmin
+        isAdmin,
       });
 
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
       console.error("💥 returnBook Error:", error);
-      return res.status(error.status || 500).json({ success: false, message: error.message });
+      return res
+        .status(error.status || 500)
+        .json({ success: false, message: error.message });
     }
   },
 
- // Gia hạn
+  // Gia hạn
   extendBorrow: async (req, res) => {
     try {
       const { borrowId } = req.params;
@@ -58,46 +67,60 @@ const borrowController = {
         borrowId,
         userId,
         extraDays: extra_days || 7,
-        isAdmin
+        isAdmin,
       });
 
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
       console.error("💥 extendBorrow Error:", error);
-      return res.status(error.status || 500).json({ success: false, message: error.message });
+      return res
+        .status(error.status || 500)
+        .json({ success: false, message: error.message });
     }
   },
 
-// Đặt trước
+  // Đặt trước
   reserveBook: async (req, res) => {
     try {
       const { book_id } = req.body;
       const userId = req.user?.id;
 
-      if (!userId) return res.status(401).json({ success: false, message: "Phải đăng nhập" });
+      if (!userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Phải đăng nhập" });
 
       const result = await Borrow.reserveBook({
         userId,
-        bookId: book_id
+        bookId: book_id,
       });
 
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
       console.error("💥 reserveBook Error:", error);
-      return res.status(error.status || 500).json({ success: false, message: error.message });
+      return res
+        .status(error.status || 500)
+        .json({ success: false, message: error.message });
     }
   },
 
   // Lịch sử mượn
   getBorrowHistory: async (req, res) => {
-    console.log("🔍 Fetching history for user:", req.user?.id, "Role:", req.user?.role);
+    console.log(
+      "🔍 Fetching history for user:",
+      req.user?.id,
+      "Role:",
+      req.user?.role,
+    );
     try {
       const userId = req.user?.id;
       const isAdmin = req.user?.role === "admin";
       const targetUserId = req.query.user_id ? Number(req.query.user_id) : null;
 
       if (!userId && !isAdmin) {
-        return res.status(401).json({ success: false, message: "Unauthorized", data: [] });
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized", data: [] });
       }
 
       const history = await Borrow.getBorrowHistory({
@@ -105,28 +128,35 @@ const borrowController = {
         isAdmin,
         targetUserId,
       });
-      
+
       return res.status(200).json({ success: true, data: history });
     } catch (error) {
       console.error("💥 history ERROR:", error);
-      return res.status(500).json({ 
-        success: false, 
+      return res.status(500).json({
+        success: false,
         message: "Lỗi tải lịch sử: " + error.message,
-        data: []
+        data: [],
       });
     }
   },
 
-// Lịch sử mượn
+  // Lịch sử mượn
   getBorrowHistory: async (req, res) => {
-    console.log("🔍 Fetching history for user:", req.user?.id, "Role:", req.user?.role);
+    console.log(
+      "🔍 Fetching history for user:",
+      req.user?.id,
+      "Role:",
+      req.user?.role,
+    );
     try {
       const userId = req.user?.id;
       const isAdmin = req.user?.role === "admin";
       const targetUserId = req.query.user_id ? Number(req.query.user_id) : null;
 
       if (!userId && !isAdmin) {
-        return res.status(401).json({ success: false, message: "Unauthorized", data: [] });
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized", data: [] });
       }
 
       const history = await Borrow.getBorrowHistory({
@@ -134,26 +164,28 @@ const borrowController = {
         isAdmin,
         targetUserId,
       });
-      
+
       return res.status(200).json({ success: true, data: history });
     } catch (error) {
       console.error("💥 history ERROR:", error);
-      return res.status(500).json({ 
-        success: false, 
+      return res.status(500).json({
+        success: false,
         message: "Lỗi tải lịch sử: " + error.message,
-        data: []
+        data: [],
       });
     }
   },
 
- // Trạng thái sách
+  // Trạng thái sách
   getBookStatus: async (req, res) => {
     try {
       const { bookId } = req.params;
       const status = await Borrow.getBookStatus(bookId);
       return res.status(200).json({ success: true, data: status });
     } catch (error) {
-      return res.status(error.status || 500).json({ success: false, message: error.message });
+      return res
+        .status(error.status || 500)
+        .json({ success: false, message: error.message });
     }
   },
 
@@ -170,7 +202,9 @@ const borrowController = {
         data: overdueRows,
       });
     } catch (error) {
-      return res.status(error.status || 500).json({ success: false, message: error.message });
+      return res
+        .status(error.status || 500)
+        .json({ success: false, message: error.message });
     }
   },
 
@@ -186,7 +220,6 @@ const borrowController = {
       console.error("💥 Seed ERROR:", error);
       return res.status(500).json({ success: false, message: error.message });
     }
-  }
+  },
 };
-
 module.exports = borrowController;
