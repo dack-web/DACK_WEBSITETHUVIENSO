@@ -3,36 +3,40 @@ const fs = require("fs");
 const path = require("path");
 
 const bookController = {
-    // Lấy tất cả sách
+    // Lấy tất cả sách (Hỗ trợ Search, Filter, Sort, Pagination)
     getAllBooks: async (req, res) => {
         try {
-            const books = await Book.getAll();
-            res.status(200).json({ success: true, data: books });
+            const { q, category_id, author_id, sort, page, limit } = req.query;
+            
+            // Sử dụng searchBooks thay vì getAll nếu có bất kỳ tham số nào
+            const result = await Book.searchBooks({
+                query: q,
+                category_id,
+                author_id,
+                sort,
+                page: parseInt(page) || 1,
+                limit: parseInt(limit) || 12
+            });
+
+            res.status(200).json({ 
+                success: true, 
+                data: result.books,
+                pagination: result.pagination
+            });
         } catch (error) {
+            console.error("❌ Get Books Error:", error);
             res.status(500).json({ success: false, message: error.message });
         }
     },
 
-    // Tìm kiếm sách theo tên
-    // Chức năng: Tìm kiếm sách theo tên - Mỹ Tâm
-    searchBooks: async (req, res) => {
+    // Lấy gợi ý sách
+    getRecommended: async (req, res) => {
         try {
-            // Lấy các tham số từ query URL
-            const { title, category_id, author_id, sort_by, page, limit } = req.query; 
-
-            // Gọi hàm tìm kiếm và truyền thêm bộ lọc, sắp xếp, phân trang (Mỹ Tâm)
-            const result = await Book.searchByTitle(title, category_id, author_id, sort_by, page, limit);
-            
-            res.status(200).json({ 
-                success: true, 
-                data: result.books,
-                pagination: {
-                    totalBooks: result.totalBooks,
-                    totalPages: result.totalPages,
-                    currentPage: result.currentPage
-                }
-            });
+            const { exclude, limit } = req.query;
+            const books = await Book.getRecommendedBooks(exclude, limit || 4);
+            res.status(200).json({ success: true, data: books });
         } catch (error) {
+            console.error("❌ Get Recommended Error:", error);
             res.status(500).json({ success: false, message: error.message });
         }
     },
@@ -55,11 +59,11 @@ const bookController = {
     // Thêm sách mới
     addBook: async (req, res) => {
         try {
-            const { title, author_id, category_id, description, published_year } = req.body;
+            const { title, author_id, category_id, description, published_year, isbn } = req.body;
             
             // Xử lý file upload
             const cover_image = req.files && req.files.cover_image 
-                ? `/uploads/images/${req.files.cover_image[0].filename}` 
+                ? `/uploads/book_covers/${req.files.cover_image[0].filename}` 
                 : null;
             const pdf_file = req.files && req.files.pdf_file 
                 ? `/uploads/pdfs/${req.files.pdf_file[0].filename}` 
@@ -67,12 +71,13 @@ const bookController = {
 
             const bookId = await Book.create({
                 title,
-                author_id,
-                category_id,
+                author_id: author_id ? parseInt(author_id) : null,
+                category_id: category_id ? parseInt(category_id) : null,
                 description,
                 cover_image,
                 pdf_file,
-                published_year: published_year || null
+                published_year: published_year ? parseInt(published_year) : null,
+                isbn: isbn || null
             });
 
             res.status(201).json({
@@ -81,12 +86,21 @@ const bookController = {
                 bookId: bookId
             });
         } catch (error) {
+            console.error("❌ Add Book Error:", error);
             // Xóa file nếu insert DB lỗi
             if (req.files) {
-                if (req.files.cover_image) fs.unlinkSync(req.files.cover_image[0].path);
-                if (req.files.pdf_file) fs.unlinkSync(req.files.pdf_file[0].path);
+                if (req.files.cover_image && req.files.cover_image[0]) {
+                    try { fs.unlinkSync(req.files.cover_image[0].path); } catch (e) {}
+                }
+                if (req.files.pdf_file && req.files.pdf_file[0]) {
+                    try { fs.unlinkSync(req.files.pdf_file[0].path); } catch (e) {}
+                }
             }
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ 
+                success: false, 
+                message: "Lỗi hệ thống khi thêm sách: " + error.message,
+                details: error.code || null
+            });
         }
     },
 
@@ -112,7 +126,7 @@ const bookController = {
                         const oldPath = path.join(__dirname, "../../", oldBook.cover_image);
                         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
                     }
-                    cover_image = `/uploads/images/${req.files.cover_image[0].filename}`;
+                    cover_image = `/uploads/book_covers/${req.files.cover_image[0].filename}`;
                 }
                 if (req.files.pdf_file) {
                     // Xóa file pdf cũ
@@ -126,12 +140,13 @@ const bookController = {
 
             await Book.update(bookId, {
                 title,
-                author_id,
-                category_id,
+                author_id: author_id ? parseInt(author_id) : null,
+                category_id: category_id ? parseInt(category_id) : null,
                 description,
                 cover_image,
                 pdf_file,
-                published_year: published_year || null
+                published_year: published_year ? parseInt(published_year) : null,
+                isbn: isbn || null
             });
 
             res.status(200).json({ success: true, message: "Cập nhật sách thành công!" });
@@ -161,6 +176,7 @@ const bookController = {
             await Book.delete(req.params.id);
             res.status(200).json({ success: true, message: "Xóa sách thành công!" });
         } catch (error) {
+            console.error("❌ Delete Book Error:", error);
             res.status(500).json({ success: false, message: error.message });
         }
     }
