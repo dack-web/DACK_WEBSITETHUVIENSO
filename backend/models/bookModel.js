@@ -1,5 +1,17 @@
 const db = require("../config/db_config");
 
+const Book = {
+    getAll: async () => {
+        let result = await db.query(`
+            SELECT b.*, a.name as author_name, c.name as category_name 
+            FROM books b 
+            LEFT JOIN authors a ON b.author_id = a.id 
+            LEFT JOIN categories c ON b.category_id = c.id
+            ORDER BY b.created_at DESC
+        `);
+        const rows = Array.isArray(result[0]) ? result[0] : result;
+        return rows;
+    },
 
     // Chức năng: Tìm kiếm sách theo tên - Mỹ Tâm
     // Đã nâng cấp: Thêm Lọc, Sắp xếp và Phân trang
@@ -71,17 +83,7 @@ const db = require("../config/db_config");
         };
     },
 
-    getById: async (id) => {
-        let result = await db.query(`
-            SELECT b.*, a.name as author_name, c.name as category_name 
-            FROM books b 
-            LEFT JOIN authors a ON b.author_id = a.id 
-            LEFT JOIN categories c ON b.category_id = c.id
-            WHERE b.id = ?
-        `, [id]);
-        const rows = Array.isArray(result[0]) ? result[0] : result;
-        return rows[0];
-    },
+   
 
     // Chức năng: Gợi ý sách liên quan (cùng thể loại) - Mỹ Tâm
     getRelatedBooks: async (bookId, limit = 5) => {
