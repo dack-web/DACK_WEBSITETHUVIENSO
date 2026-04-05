@@ -124,6 +124,19 @@ label {
     width: 100%;
     font-size: var(--fs-14);
 }
+.error {
+    color: var(--primary-red);
+    font-size: var(--fs-12);
+    padding-left: var(--sp-4);
+    margin-bottom: var(--sp-16);
+}
+
+.success-text {
+    color: green;
+    font-weight: 500;
+    font-size: var(--fs-14);
+    margin-bottom: var(--sp-12);
+}
 
 .success-text {
     color: green;
@@ -284,6 +297,9 @@ footer {
     justify-content: space-between;
     font-size: var(--fs-12);
     color: var(--Light_mode-Gray_Scale-40);
+}
+footer p {
+    font-size: var(--fs-16);
 }
 
 .footer-links a {
